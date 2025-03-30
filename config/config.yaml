@@ -1,0 +1,28 @@
+# Driver Drowsiness Detection Configuration
+
+# Camera settings
+camera:
+  device_id: 0  # Camera device ID (usually 0 for built-in webcam)
+  resolution: [640, 480]  # Width, Height
+  fps: 30  # Frames per second
+
+# Detection settings
+detection:
+  face_confidence: 0.5  # Minimum confidence for face detection (0.0 to 1.0)
+  eye_aspect_ratio_threshold: 0.3  # Threshold for eye aspect ratio (higher is more sensitive)
+  consecutive_frames_threshold: 10  # Number of consecutive frames to confirm drowsiness
+
+# Drowsiness thresholds
+drowsiness:
+  normal:
+    ear_threshold: 0.3  # EAR threshold for normal drowsiness
+    duration_threshold: 1.5  # Duration (seconds) for normal drowsiness alert
+    message: "Hey, are you awake? Please respond."
+  extreme:
+    ear_threshold: 0.25  # EAR threshold for extreme drowsiness
+    duration_threshold: 0.8  # Duration (seconds) for extreme drowsiness alert
+    message: "Warning! You appear to be falling asleep! Wake up now!"
+
+# Alert settings
+alerts:
+  volume: 0.8  # Volume level (0.0 to 1.0)
