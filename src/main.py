@@ -89,6 +89,12 @@ def main():
     
     print("Driver Drowsiness Detection System Started")
     print("Press 'q' to quit")
+
+    # Variables for face detection alerts
+    face_detected = False
+    face_detection_start_time = time.time()
+    last_no_face_alert_time = time.time()
+    no_face_alert_interval = config['face_detection']['alert_interval']  # seconds between no-face alerts
     
     # Main loop
     while True:
@@ -101,6 +107,9 @@ def main():
         # Start FPS calculation
         fps_counter.start()
         
+        # Get current time
+        current_time = time.time()
+        
         # Detect face in the frame
         faces = face_detector.detect(frame)
         
@@ -108,26 +117,41 @@ def main():
         current_drowsiness_level = "AWAKE"
         
         # Process each detected face
-        for face in faces:
-            # Detect eyes landmarks
-            landmarks = eye_detector.detect(frame, face)
+        if faces:
+            face_detected = True
+            last_no_face_alert_time = time.time()
             
-            # Calculate eye aspect ratio
-            left_ear, right_ear = eye_detector.calculate_eye_aspect_ratio(landmarks)
-            avg_ear = (left_ear + right_ear) / 2.0
+            for face in faces:
+                # Detect eyes landmarks
+                landmarks = eye_detector.detect(frame, face)
+                
+                # Calculate eye aspect ratio
+                left_ear, right_ear = eye_detector.calculate_eye_aspect_ratio(landmarks)
+                avg_ear = (left_ear + right_ear) / 2.0
+                
+                # Draw eye landmarks
+                eye_detector.draw_eyes(frame, landmarks)
+                
+                # Check for drowsiness
+                current_drowsiness_level = drowsiness_detector.detect(avg_ear)
+                
+                # Draw drowsiness status on frame
+                draw_status(frame, current_drowsiness_level, avg_ear)
+                
+                # Display eye tracking data
+                display_eye_tracking_data(frame, left_ear, right_ear, avg_ear, 
+                                        drowsiness_detector.eye_aspect_ratio_threshold)
+        else:
+            face_detected = False
             
-            # Draw eye landmarks
-            eye_detector.draw_eyes(frame, landmarks)
-            
-            # Check for drowsiness
-            current_drowsiness_level = drowsiness_detector.detect(avg_ear)
-            
-            # Draw drowsiness status on frame
-            draw_status(frame, current_drowsiness_level, avg_ear)
-            
-            # Display eye tracking data including threshold
-            display_eye_tracking_data(frame, left_ear, right_ear, avg_ear, 
-                                    drowsiness_detector.eye_aspect_ratio_threshold)
+            # Check if we should play the no-face alert
+            if current_time - last_no_face_alert_time >= no_face_alert_interval:
+                # Only play alert if the system has been running for at least x seconds
+                # to give time for camera initialization
+                if current_time - face_detection_start_time >= no_face_alert_interval:
+                    print(f"No face detected for {current_time - last_no_face_alert_time:.1f} seconds")
+                    audio_alerts.play_no_face_alert(config['face_detection']['message'])
+                    last_no_face_alert_time = current_time
         
         # Update audio alerts based on current drowsiness level
         audio_alerts.update(current_drowsiness_level)
@@ -138,6 +162,13 @@ def main():
         # Display FPS on frame
         cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        # Display face detection status
+        status_text = "Face detected" if face_detected else f"No face detected for {current_time - last_no_face_alert_time:.1f}s"
+        
+        cv2.putText(frame, status_text, (10, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, 
+                    (0, 255, 0) if face_detected else (0, 0, 255), 2)
         
         # Display frame
         cv2.imshow("Driver Drowsiness Detection", frame)

@@ -32,7 +32,7 @@ class AudioAlerts:
         
         # Initialize pygame mixer
         pygame.mixer.init()
-        pygame.mixer.set_num_channels(2)
+        pygame.mixer.set_num_channels(3)
         
         # Set up channels
         self.normal_channel = pygame.mixer.Channel(0)
@@ -181,3 +181,27 @@ class AudioAlerts:
         self.stop_voice_detection = True
         self.stop_all_alerts()
         pygame.mixer.quit()
+
+    def play_no_face_alert(self, message="No face detected! Please position yourself in front of the camera."):
+        """
+        Play a one-time alert when no face is detected
+        
+        Args:
+            message (str): Message to play when no face is detected
+        """
+        # Create audio directory if it doesn't exist
+        audio_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "audio")
+        os.makedirs(audio_dir, exist_ok=True)
+        
+        # Generate no face alert audio
+        no_face_audio_path = os.path.join(audio_dir, "alert_no_face.mp3")
+        tts = gTTS(text=message, lang='en')
+        tts.save(no_face_audio_path)
+        
+        # Play the alert once (not looping)
+        no_face_sound = pygame.mixer.Sound(no_face_audio_path)
+        no_face_sound.set_volume(self.volume)
+        
+        # Use a different channel for the no-face alert
+        # to avoid conflicts with drowsiness alerts
+        pygame.mixer.Channel(2).play(no_face_sound)

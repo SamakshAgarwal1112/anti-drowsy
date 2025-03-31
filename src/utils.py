@@ -114,7 +114,7 @@ def display_eye_tracking_data(frame, left_ear, right_ear, avg_ear, eye_thresh):
         None (modifies frame in-place)
     """
     # Set metrics position
-    y_pos = 60
+    y_pos = 100
     left_x = 10
     right_x = frame.shape[1] - 170
     
