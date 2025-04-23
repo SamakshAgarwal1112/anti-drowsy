@@ -10,7 +10,7 @@ camera:
 detection:
   face_confidence: 0.5  # Minimum confidence for face detection (0.0 to 1.0)
   eye_aspect_ratio_threshold: 0.3  # Threshold for eye aspect ratio (higher is more sensitive)
-  consecutive_frames_threshold: 10  # Number of consecutive frames to confirm drowsiness
+  consecutive_frames_threshold: 20  # Number of consecutive frames to confirm drowsiness
 
 # Drowsiness thresholds
 drowsiness:
@@ -19,8 +19,8 @@ drowsiness:
     duration_threshold: 1.5  # Duration (seconds) for normal drowsiness alert
     message: "Hey, are you awake? Please respond."
   extreme:
-    ear_threshold: 0.2  # EAR threshold for extreme drowsiness
-    duration_threshold: 1  # Duration (seconds) for extreme drowsiness alert
+    ear_threshold: 0.25  # EAR threshold for extreme drowsiness
+    duration_threshold: 1.5  # Duration (seconds) for extreme drowsiness alert
     message: "Warning! You appear to be falling asleep! Wake up now!"
 
 # Alert settings
@@ -29,5 +29,10 @@ alerts:
 
 # Face detection alerts
 face_detection:
-  alert_interval: 10.0  # Time in seconds between alerts when no face is detected
+  alert_interval: 5.0  # Time in seconds between alerts when no face is detected
   message: "No face detected! Please position yourself in front of the camera."
+
+# Add this section to your config.yaml file
+gemini:
+  api_key: "AIzaSyBV6KJlTxlda-BrpqUwl1Hm-PNNh4r7KKU"  # Replace with your actual API key
+  api_url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"

@@ -27,6 +27,8 @@ def parse_args():
                         help="Path to configuration file")
     parser.add_argument("--camera", type=int, default=None,
                         help="Camera device ID (overrides config file)")
+    parser.add_argument("--gemini-api-key", type=str, default=None,
+                        help="Gemini API key (overrides config file)")
     return parser.parse_args()
 
 def load_config(config_path):
@@ -47,6 +49,11 @@ def main():
     # Override camera device if specified in command line
     if args.camera is not None:
         config['camera']['device_id'] = args.camera
+    
+    # Get Gemini API key
+    gemini_api_key = args.gemini_api_key or config.get('gemini', {}).get('api_key')
+    if not gemini_api_key:
+        print("Warning: No Gemini API key provided. Voice analysis will be limited.")
     
     # Initialize components
     face_detector = FaceDetector(
@@ -71,7 +78,10 @@ def main():
     audio_alerts = AudioAlerts(
         normal_message=config['drowsiness']['normal']['message'],
         extreme_message=config['drowsiness']['extreme']['message'],
-        volume=config['alerts']['volume']
+        volume=config['alerts']['volume'],
+        gemini_api_key=gemini_api_key,
+        gemini_api_url=config.get('gemini', {}).get('api_url', 
+                                "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent")
     )
     
     # Initialize camera
